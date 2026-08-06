@@ -3,109 +3,83 @@ import pandas as pd
 from datetime import datetime
 import plotly.express as px
 
-# ==================== 1. 统一高质感浅色 UI (CSS) ====================
+# ==================== 1. 页面基本配置 ====================
 st.set_page_config(page_title="PocketSmith AI Ledger", layout="wide", page_icon="💳")
 
-st.markdown("""
+# 初始化主题设置 (默认：统一浅色调)
+if "theme_choice" not in st.session_state:
+    st.session_state.theme_choice = "统一浅色 (Default)"
+
+# ==================== 2. 侧边栏：主题自定义与财务设置 ====================
+with st.sidebar:
+    st.markdown("### 🎨 界面主题自定义")
+    theme = st.selectbox(
+        "选择您喜欢的视觉风格：",
+        ["统一浅色 (Default)", "暗黑极客 (Dark Mode)", "清新森林 (Forest Green)", "柔和樱花 (Sakura Pink)"],
+        key="theme_selector"
+    )
+    st.session_state.theme_choice = theme
+    st.markdown("---")
+
+# 根据用户选择，动态注入 CSS 样式
+theme_styles = {
+    "统一浅色 (Default)": """
+        .stApp { background-color: #f8fafc; color: #1e293b; }
+        .hero-card { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; }
+        .metric-card { background: #ffffff; border: 1px solid #e2e8f0; color: #0f172a; }
+        .stButton>button { background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%); color: white; }
+    """,
+    "暗黑极客 (Dark Mode)": """
+        .stApp { background-color: #0b0f19; color: #e2e8f0; }
+        .hero-card { background: linear-gradient(135deg, #0f172a 0%, #312e81 100%); color: white; }
+        .metric-card { background: #111827; border: 1px solid #1f2937; color: #f8fafc; }
+        .stButton>button { background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%); color: white; }
+        div[data-testid="stDataFrame"] { background-color: #111827 !important; }
+    """,
+    "清新森林 (Forest Green)": """
+        .stApp { background-color: #f0fdf4; color: #14532d; }
+        .hero-card { background: linear-gradient(135deg, #14532d 0%, #16a34a 100%); color: white; }
+        .metric-card { background: #ffffff; border: 1px solid #bbf7d0; color: #052e16; }
+        .stButton>button { background: linear-gradient(90deg, #16a34a 0%, #15803d 100%); color: white; }
+    """,
+    "柔和樱花 (Sakura Pink)": """
+        .stApp { background-color: #fff1f2; color: #881337; }
+        .hero-card { background: linear-gradient(135deg, #9f1239 0%, #f43f5e 100%); color: white; }
+        .metric-card { background: #ffffff; border: 1px solid #fecdd3; color: #4c0519; }
+        .stButton>button { background: linear-gradient(90deg, #f43f5e 0%, #e11d48 100%); color: white; }
+    """
+}
+
+st.markdown(f"""
 <style>
-    /* 全局背景：统一暖灰色调 */
-    .stApp {
-        background-color: #f8fafc;
-        color: #1e293b;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
+    /* 注入选中的背景主题 */
+    {theme_styles[st.session_state.theme_choice]}
     
-    header {visibility: hidden;}
-    footer {visibility: hidden;}
+    header {{visibility: hidden;}}
+    footer {{visibility: hidden;}}
     
-    /* 顶部 Banner 统一深蓝高级渐变 */
-    .hero-card {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    .hero-card {{
         padding: 24px 30px;
         border-radius: 16px;
         margin-bottom: 24px;
-        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.15);
-    }
-    
-    /* 统一 Metric 指标卡片 */
-    .metric-card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    }}
+    .metric-card {{
         border-radius: 12px;
         padding: 20px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .metric-card:hover {
-        border-color: #3b82f6;
-        transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-    }
-    .metric-label {
-        font-size: 0.8rem;
-        color: #64748b;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .metric-value {
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: #0f172a;
-        margin-top: 4px;
-    }
-    .metric-subtext {
-        font-size: 0.8rem;
-        margin-top: 4px;
-    }
-
-    /* 统一浅色表单与表格 */
-    div[data-testid="stDataFrame"] {
-        background-color: #ffffff !important;
-        border-radius: 12px !important;
-        border: 1px solid #e2e8f0 !important;
-        padding: 8px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-    }
+        transition: transform 0.2s;
+    }}
+    .metric-card:hover {{ transform: translateY(-2px); }}
+    .metric-label {{ font-size: 0.8rem; opacity: 0.8; font-weight: 600; text-transform: uppercase; }}
+    .metric-value {{ font-size: 1.8rem; font-weight: 800; margin-top: 4px; }}
     
-    /* 统一主按钮样式 */
-    .stButton>button {
-        background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 20px;
-        font-weight: 600;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-    }
-    .stButton>button:hover {
-        background: linear-gradient(90deg, #1d4ed8 0%, #1e40af 100%);
-        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
-    }
-
-    /* 统一 Tab 选项卡样式 */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background-color: #f1f5f9;
-        padding: 6px;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-    }
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 8px;
-        color: #64748b;
-        padding: 8px 16px;
-        font-weight: 600;
-    }
-    .stTabs [aria-selected="true"] {
-        background-color: #ffffff !important;
-        color: #2563eb !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    }
+    /* 统一按钮与卡片圆角 */
+    .stButton>button {{ border: none; border-radius: 8px; padding: 10px 20px; font-weight: 600; }}
 </style>
 """, unsafe_allow_html=True)
 
-# ==================== 2. Session 会话状态初始化 ====================
+# ==================== 3. Session 状态初始化 ====================
 if "user_income" not in st.session_state:
     st.session_state.user_income = 3000.0
 if "fixed_expense" not in st.session_state:
@@ -120,6 +94,7 @@ if "quiz_step" not in st.session_state:
 if "quiz_answers" not in st.session_state:
     st.session_state.quiz_answers = {}
 
+# 每一笔开销的长期流水记录表 (存档)
 if "ledger_records" not in st.session_state:
     st.session_state.ledger_records = pd.DataFrame(
         columns=["日期", "所属月份", "金额(RM)", "消费分类", "具体明细", "理财管家专业建议"]
@@ -128,7 +103,7 @@ if "ledger_records" not in st.session_state:
 monthly_budget = st.session_state.user_income - st.session_state.fixed_expense - st.session_state.target_savings
 current_month_str = datetime.now().strftime("%Y-%m")
 
-# ==================== 3. 侧边栏：统一浅色参数设置 ====================
+# 侧边栏：财务参数输入
 with st.sidebar:
     st.markdown("### ⚙️ 个人财务控制台")
     st.caption("设定您的每月预算基准")
@@ -152,35 +127,35 @@ st.markdown(f"""
 <div class="hero-card">
     <div style="display: flex; justify-content: space-between; align-items: center;">
         <div>
-            <h1 style="color: white; margin:0; font-size: 1.8rem; font-weight: 800; letter-spacing: 0.5px;">
+            <h1 style="margin:0; font-size: 1.8rem; font-weight: 800;">
                 PocketSmith 智能消费管理系统
             </h1>
-            <p style="color: #dbeafe; margin: 4px 0 0 0; font-size: 0.9rem;">
-                专业理财管家 · 实时分析与智能开销存档
+            <p style="margin: 4px 0 0 0; font-size: 0.9rem; opacity: 0.9;">
+                专业理财管家 · 开销实时诊断与全量存档
             </p>
         </div>
-        <div style="text-align: right;">
-            <span style="background: rgba(255, 255, 255, 0.2); color: #ffffff; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                统一清爽视觉版
+        <div>
+            <span style="background: rgba(255, 255, 255, 0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                主题: {st.session_state.theme_choice.split(' ')[0]}
             </span>
         </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# 计算财务数据
+# 计算财务指标
 spent_so_far = st.session_state.ledger_records["金额(RM)"].sum() if not st.session_state.ledger_records.empty else 0.0
 remaining_budget = monthly_budget - spent_so_far
 daily_safe_spend = max(0.0, round(remaining_budget / 30, 2))
 
-# 4大指标卡片
+# 4大指标仪表盘
 c1, c2, c3, c4 = st.columns(4)
 with c1:
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-label">月度总收入</div>
-        <div class="metric-value" style="color:#0284c7;">RM {st.session_state.user_income:,.2f}</div>
-        <div class="metric-subtext" style="color:#64748b;">固定支出: RM {st.session_state.fixed_expense:,.0f}</div>
+        <div class="metric-value">RM {st.session_state.user_income:,.2f}</div>
+        <div style="font-size:0.8rem; opacity:0.7;">固定支出: RM {st.session_state.fixed_expense:,.0f}</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -189,17 +164,16 @@ with c2:
     <div class="metric-card">
         <div class="metric-label">可自由支配预算</div>
         <div class="metric-value">RM {monthly_budget:,.2f}</div>
-        <div class="metric-subtext" style="color:#64748b;">预留储蓄: RM {st.session_state.target_savings:,.0f}</div>
+        <div style="font-size:0.8rem; opacity:0.7;">预留储蓄: RM {st.session_state.target_savings:,.0f}</div>
     </div>
     """, unsafe_allow_html=True)
 
 with c3:
-    spent_color = "#dc2626" if spent_so_far > monthly_budget else "#d97706"
     st.markdown(f"""
     <div class="metric-card">
-        <div class="metric-label">本月已累计支出</div>
-        <div class="metric-value" style="color:{spent_color};">RM {spent_so_far:,.2f}</div>
-        <div class="metric-subtext" style="color:#64748b;">共记录 {len(st.session_state.ledger_records)} 笔开销</div>
+        <div class="metric-label">本月累计支出</div>
+        <div class="metric-value" style="color:#e11d48;">RM {spent_so_far:,.2f}</div>
+        <div style="font-size:0.8rem; opacity:0.7;">已存档 {len(st.session_state.ledger_records)} 笔开销</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -209,13 +183,13 @@ with c4:
     <div class="metric-card">
         <div class="metric-label">每日安全额度 (Daily Safe)</div>
         <div class="metric-value" style="color:{rem_color};">RM {daily_safe_spend:,.2f}</div>
-        <div class="metric-subtext" style="color:{rem_color};">{'预算控制良好' if remaining_budget>=0 else '超支预警'}</div>
+        <div style="font-size:0.8rem; color:{rem_color};">{'预算控制良好' if remaining_budget>=0 else '超支预警'}</div>
     </div>
     """, unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ==================== 5. 核心 Tab 功能区 ====================
+# ==================== 5. 核心功能 Tab ====================
 tab_track, tab_analytics, tab_bank, tab_quiz = st.tabs([
     "✍️ 智能记账与开销诊断", 
     "📊 消费特点分析图表", 
@@ -223,7 +197,7 @@ tab_track, tab_analytics, tab_bank, tab_quiz = st.tabs([
     "🧩 财商心理特点测评"
 ])
 
-# ----------------- TAB 1: 记账与专业诊断 -----------------
+# ----------------- TAB 1: 记账与专业诊断 (实时存档) -----------------
 with tab_track:
     left_col, right_col = st.columns([1.1, 1.9])
     
@@ -237,29 +211,30 @@ with tab_track:
             submit_btn = st.form_submit_button("🚀 存档并获取管家建议", use_container_width=True)
             
             if submit_btn and amount > 0:
-                # 专业理财管家建议逻辑
+                # 结合消费性格与财务沙盘的专业省钱建议逻辑
                 personality = st.session_state.user_personality
                 if "冲动享乐" in personality:
                     if category in ["弹性享乐(娱乐/社交)", "餐饮美食"] and amount > 50:
-                        advice = f"💡 管家建议：检测到高额弹性开支 (RM {amount})！冲动型消费易造成预算缺口，建议设 24 小时冷静期。"
+                        advice = f"💡 管家诊断：检测到高额弹性开支 (RM {amount})！冲动型消费易造成预算缺口，建议设置 24 小时冷静期。"
                     else:
-                        advice = f"🟢 记录成功。请控制每日支出不超过 RM {daily_safe_spend}。"
+                        advice = f"🟢 记录成功。请控制每日支出不超过上限 RM {daily_safe_spend}。"
                 elif "焦虑防御" in personality:
                     if category in ["弹性享乐(娱乐/社交)", "餐饮美食"]:
-                        advice = f"🟢 管家建议：消费 RM {amount} 属于合理的品质支出，适度放松有助于保持长期健康理财心态。"
+                        advice = f"🟢 管家诊断：消费 RM {amount} 属于合理品质开支，适度放松有助于保持健康理财心态。"
                     else:
                         advice = f"🟢 支出符合防线规划，财务状况稳健。"
                 elif "目标驱动" in personality:
-                    advice = f"🎯 管家建议：已记账 RM {amount}。本月剩余额度 RM {max(0.0, remaining_budget - amount):,.2f}，距储蓄目标更近一步。"
+                    advice = f"🎯 管家诊断：已记账 RM {amount}。本月剩余额度 RM {max(0.0, remaining_budget - amount):,.2f}，距储蓄目标更近一步。"
                 else:
-                    advice = f"🟢 已存档！该笔开销占每日建议额度的 {round((amount/daily_safe_spend)*100, 1) if daily_safe_spend > 0 else 100}%。"
+                    advice = f"🟢 已成功存档！该笔开销占每日建议额度的 {round((amount/daily_safe_spend)*100, 1) if daily_safe_spend > 0 else 100}%。"
                 
                 now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 new_row = pd.DataFrame([[now_str, current_month_str, amount, category, detail, advice]],
                                        columns=["日期", "所属月份", "金额(RM)", "消费分类", "具体明细", "理财管家专业建议"])
                 
+                # 存档追加到数据库
                 st.session_state.ledger_records = pd.concat([st.session_state.ledger_records, new_row], ignore_index=True)
-                st.success("账目已完美存档！")
+                st.success("开销记录已成功归档保存！")
                 st.rerun()
 
     with right_col:
@@ -268,7 +243,7 @@ with tab_track:
             display_df = st.session_state.ledger_records.iloc[::-1][["日期", "消费分类", "金额(RM)", "具体明细", "理财管家专业建议"]]
             st.dataframe(display_df, use_container_width=True, height=360, hide_index=True)
         else:
-            st.info("💡 当前暂无开销记录。在左侧录入第一笔消费即可开启存档与分析！")
+            st.info("💡 当前暂无开销存档。在左侧录入第一笔消费即可开启存档与分析！")
 
 # ----------------- TAB 2: 图表分析 -----------------
 with tab_analytics:
@@ -277,24 +252,14 @@ with tab_analytics:
         with g1:
             st.markdown("#### 🍩 消费领域分布占比")
             cat_summary = st.session_state.ledger_records.groupby("消费分类")["金额(RM)"].sum().reset_index()
-            fig_pie = px.pie(cat_summary, values="金额(RM)", names="消费分类", hole=0.55,
-                             color_discrete_sequence=px.colors.qualitative.Set2)
-            fig_pie.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='#334155'), margin=dict(t=20, b=20, l=20, r=20),
-                legend=dict(orientation="h", yanchor="bottom", y=-0.2)
-            )
+            fig_pie = px.pie(cat_summary, values="金额(RM)", names="消费分类", hole=0.55)
+            fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(t=20, b=20, l=20, r=20))
             st.plotly_chart(fig_pie, use_container_width=True)
             
         with g2:
             st.markdown("#### 📈 消费时间分布与开支流向")
-            fig_bar = px.bar(st.session_state.ledger_records, x="日期", y="金额(RM)", color="消费分类",
-                             color_discrete_sequence=px.colors.qualitative.Pastel)
-            fig_bar.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='#334155'), xaxis=dict(showgrid=False),
-                yaxis=dict(showgrid=True, gridcolor='#f1f5f9'), margin=dict(t=20, b=20, l=20, r=20)
-            )
+            fig_bar = px.bar(st.session_state.ledger_records, x="日期", y="金额(RM)", color="消费分类")
+            fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(t=20, b=20, l=20, r=20))
             st.plotly_chart(fig_bar, use_container_width=True)
     else:
         st.info("💡 暂无数据，请先录入消费事项。")
@@ -302,19 +267,18 @@ with tab_analytics:
 # ----------------- TAB 3: 资金与储蓄库 -----------------
 with tab_bank:
     st.markdown("### 🏦 资产与预算结余概览")
-    
     vault_balance = st.session_state.target_savings + max(0.0, remaining_budget)
     
     bank_col1, bank_col2 = st.columns([1.1, 1.9])
     with bank_col1:
         st.markdown(f"""
-        <div style="background: #ffffff; padding:24px; border-radius:16px; border:1px solid #e2e8f0; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-            <div style="color:#64748b; font-size:0.8rem; font-weight:600;">ESTIMATED TOTAL SAVINGS</div>
-            <div style="color:#2563eb; font-size:0.9rem; margin-top:4px;">预算与储蓄储备账户</div>
-            <hr style="border-color:#f1f5f9; margin:15px 0;">
-            <div style="color:#64748b; font-size:0.8rem;">预估本月积累总额</div>
+        <div style="background: rgba(255,255,255,0.6); padding:24px; border-radius:16px; border:1px solid rgba(0,0,0,0.1);">
+            <div style="font-size:0.8rem; font-weight:600; opacity:0.7;">ESTIMATED TOTAL SAVINGS</div>
+            <div style="font-size:0.9rem; margin-top:4px;">预算与储蓄储备账户</div>
+            <hr style="margin:15px 0; opacity:0.2;">
+            <div style="font-size:0.8rem; opacity:0.7;">预估本月积累总额</div>
             <div style="font-size:2.2rem; font-weight:800; color:#16a34a; margin:6px 0;">RM {vault_balance:,.2f}</div>
-            <div style="color:#94a3b8; font-size:0.75rem;">包含刚性储蓄 RM {st.session_state.target_savings} 与当前结余</div>
+            <div style="font-size:0.75rem; opacity:0.6;">包含刚性储蓄 RM {st.session_state.target_savings} 与当前结余</div>
         </div>
         """, unsafe_allow_html=True)
         
