@@ -55,9 +55,20 @@ st.markdown(f"""
     /* 注入选中的背景主题 */
     {theme_styles[st.session_state.theme_choice]}
     
-    header {{visibility: hidden;}}
+    /* 隐藏默认页脚与右上角菜单，但强制保留侧边栏展开按钮 */
     footer {{visibility: hidden;}}
+    #MainMenu {{visibility: hidden;}}
     
+    /* 修复侧边栏展开/收起按钮：让它始终可见且处于最上层 */
+    button[data-testid="stSidebarCollapseButton"],
+    button[aria-label="Expand sidebar"],
+    button[aria-label="Collapse sidebar"] {{
+        visibility: visible !important;
+        display: flex !important;
+        z-index: 999999 !important;
+        opacity: 1 !important;
+    }}
+
     .hero-card {{
         padding: 24px 30px;
         border-radius: 16px;
@@ -74,7 +85,6 @@ st.markdown(f"""
     .metric-label {{ font-size: 0.8rem; opacity: 0.8; font-weight: 600; text-transform: uppercase; }}
     .metric-value {{ font-size: 1.8rem; font-weight: 800; margin-top: 4px; }}
     
-    /* 统一按钮与卡片圆角 */
     .stButton>button {{ border: none; border-radius: 8px; padding: 10px 20px; font-weight: 600; }}
 </style>
 """, unsafe_allow_html=True)
@@ -94,7 +104,7 @@ if "quiz_step" not in st.session_state:
 if "quiz_answers" not in st.session_state:
     st.session_state.quiz_answers = {}
 
-# 每一笔开销的长期流水记录表 (存档)
+# 开销历史全量存档表
 if "ledger_records" not in st.session_state:
     st.session_state.ledger_records = pd.DataFrame(
         columns=["日期", "所属月份", "金额(RM)", "消费分类", "具体明细", "理财管家专业建议"]
@@ -211,7 +221,6 @@ with tab_track:
             submit_btn = st.form_submit_button("🚀 存档并获取管家建议", use_container_width=True)
             
             if submit_btn and amount > 0:
-                # 结合消费性格与财务沙盘的专业省钱建议逻辑
                 personality = st.session_state.user_personality
                 if "冲动享乐" in personality:
                     if category in ["弹性享乐(娱乐/社交)", "餐饮美食"] and amount > 50:
@@ -232,7 +241,6 @@ with tab_track:
                 new_row = pd.DataFrame([[now_str, current_month_str, amount, category, detail, advice]],
                                        columns=["日期", "所属月份", "金额(RM)", "消费分类", "具体明细", "理财管家专业建议"])
                 
-                # 存档追加到数据库
                 st.session_state.ledger_records = pd.concat([st.session_state.ledger_records, new_row], ignore_index=True)
                 st.success("开销记录已成功归档保存！")
                 st.rerun()
