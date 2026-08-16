@@ -15,6 +15,8 @@ if "fixed_expense" not in st.session_state:
 if "target_savings" not in st.session_state:
     st.session_state.target_savings = 300.0
 
+if "user_personality" not in st.session_state:
+    st.session_state.user_personality = "未测评 (通用理性型)"
 
 if "in_quiz_mode" not in st.session_state:
     st.session_state.in_quiz_mode = False
