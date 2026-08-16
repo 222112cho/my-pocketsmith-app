@@ -451,11 +451,11 @@ else:
 
     head_col1, head_col2 = st.columns([3, 1])
     with head_col1:
-        st.markdown(f"""
-        <div class="hero-card">
-            <h2 style="margin:0; font-size:1.6rem;">理财管家 - 智能消费管理系统</h2>
-            <p style="margin:6px 0 0 0; opacity:0.85; font-size:0.95rem;">
-                当前已匹配模型：【{st.session_state.user_personality}】
+        st.markdown("""
+           <div class="hero-card">
+           <h2 style="margin:0; font-size:1.6rem;">理财管家 - 智能消费管理系统</h2>
+           </div>
+           """, unsafe_allow_html=True)
             </p>
         </div>
         """, unsafe_allow_html=True)
