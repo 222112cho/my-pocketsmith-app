@@ -454,8 +454,6 @@ else:
         st.markdown("""
            <div class="hero-card">
            <h2 style="margin:0; font-size:1.6rem;">理财管家 - 智能消费管理系统</h2>
-           </div>
-           """, unsafe_allow_html=True)
             </p>
         </div>
         """, unsafe_allow_html=True)
