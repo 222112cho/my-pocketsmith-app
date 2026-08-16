@@ -496,9 +496,6 @@ else:
                         primary_p = st.session_state.user_personality.split(" ")[0]
                         rule = PERSONALITY_PROFILES.get(primary_p, {}).get("advice_rule", f"账单已记录。建议将每日开销控制在 RM {daily_safe_spend} 以内。")
                         
-                        advice = f"【管家诊断 ({primary_p})】{rule}"
-                        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        
                         new_data = pd.DataFrame([[now_str, current_month_str, amount, category, detail, advice]],
                                                 columns=["日期", "所属月份", "金额(RM)", "消费分类", "具体明细", "理财管家专业建议"])
                         st.session_state.ledger_records = pd.concat([st.session_state.ledger_records, new_data], ignore_index=True)
