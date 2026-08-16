@@ -227,14 +227,17 @@ QUESTIONS_DB = [
 ]
 
 # ==================== 4. 全局通用样式设置 (统一背景与浅色按钮) ====================
+# ==================== 4. 全局通用样式设置 ====================
 with st.sidebar:
     st.markdown("### 自定义背景图片")
     bg_file = st.file_uploader("上传背景图片", type=["jpg", "jpeg", "png", "webp"])
     st.markdown("---")
     st.markdown("### 个人财务控制台")
-    st.session_state.user_income = st.number_input("每月总收入 (RM)", min_value=0.0, step=100.0, value=st.session_state.user_income)
-    st.session_state.fixed_expense = st.number_input("刚性固定支出 (RM)", min_value=0.0, step=50.0, value=st.session_state.fixed_expense)
-    st.session_state.target_savings = st.number_input("强制储蓄目标 (RM)", min_value=0.0, step=50.0, value=st.session_state.target_savings)
+    
+    # 绑定 key，去除 value= 传参，实现 0 延迟即时响应
+    st.number_input("每月总收入 (RM)", min_value=0.0, step=100.0, key="user_income")
+    st.number_input("刚性固定支出 (RM)", min_value=0.0, step=50.0, key="fixed_expense")
+    st.number_input("强制储蓄目标 (RM)", min_value=0.0, step=50.0, key="target_savings")
 
 bg_css = ""
 if bg_file is not None:
