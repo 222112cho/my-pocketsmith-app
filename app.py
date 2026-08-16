@@ -235,9 +235,6 @@ with st.sidebar:
     st.session_state.user_income = st.number_input("每月总收入 (RM)", min_value=0.0, step=100.0, value=st.session_state.user_income)
     st.session_state.fixed_expense = st.number_input("刚性固定支出 (RM)", min_value=0.0, step=50.0, value=st.session_state.fixed_expense)
     st.session_state.target_savings = st.number_input("强制储蓄目标 (RM)", min_value=0.0, step=50.0, value=st.session_state.target_savings)
-    st.markdown("---")
-    st.markdown("### 当前消费人格")
-    st.info(f"{st.session_state.user_personality}")
 
 bg_css = ""
 if bg_file is not None:
