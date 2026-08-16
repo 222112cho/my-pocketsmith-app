@@ -9,11 +9,11 @@ st.set_page_config(page_title="智能消费管理系统", layout="wide", page_ic
 
 # ==================== 2. Session 状态初始化 ====================
 if "user_income" not in st.session_state:
-    st.session_state.user_income = 3000.0
+    st.session_state.user_income = 0.0
 if "fixed_expense" not in st.session_state:
-    st.session_state.fixed_expense = 500.0
+    st.session_state.fixed_expense = 0.0
 if "target_savings" not in st.session_state:
-    st.session_state.target_savings = 300.0
+    st.session_state.target_savings = 0.0
 
 if "user_personality" not in st.session_state:
     st.session_state.user_personality = "未测评 (通用理性型)"
