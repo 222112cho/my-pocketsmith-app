@@ -496,7 +496,7 @@ else:
                         primary_p = st.session_state.user_personality.split(" ")[0]
                         rule = PERSONALITY_PROFILES.get(primary_p, {}).get("advice_rule", f"账单已记录。建议将每日开销控制在 RM {daily_safe_spend} 以内。")
 
-                        advice = f"【管家诊断 ({primary_p})】{rule}"
+                        advice = rule
                         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         
                         new_data = pd.DataFrame([[now_str, current_month_str, amount, category, detail, advice]],
