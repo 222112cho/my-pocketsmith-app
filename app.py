@@ -5,7 +5,7 @@ import plotly.express as px
 import base64
 
 # ==================== 1. 页面基本配置 ====================
-st.set_page_config(page_title="智能消费管理系统", layout="wide", page_icon="salary/logo.png")
+st.set_page_config(page_title="智能消费管理系统", layout="wide", page_icon="salary.png")
 
 # ==================== 2. Session 状态初始化 ====================
 if "user_income" not in st.session_state:
